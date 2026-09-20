@@ -1,0 +1,25 @@
+Exercise 7: Summary Comparison
+
+| Program | Communication used | Array memory allocation | Manual summation at root? | Where is the result available? |
+|---|---|---|---|---|
+| Exercise 1: Bcast | MPI_Bcast, MPI_Send, MPI_Recv | Every process allocates the full array | Yes | Rank 0 |
+| Exercise 2: Scatter | MPI_Scatter, MPI_Send, MPI_Recv | Rank 0 allocates the full array; every process also gets a local chunk | Yes | Rank 0 |
+| Exercise 3: Gather | MPI_Scatter, MPI_Gather | Rank 0 allocates the full array; every process also gets a local chunk | Yes, rank 0 adds the gathered partial sums | Rank 0 |
+| Exercise 4: Reduce | MPI_Scatter, MPI_Reduce | Rank 0 allocates the full array; every process also gets a local chunk | No | Rank 0 |
+| Exercise 5: Allreduce | MPI_Scatter, MPI_Allreduce | Rank 0 allocates the full array; every process also gets a local chunk | No | Every process gets the same total |
+| Exercise 6: Scan | MPI_Scatter, MPI_Scan | Rank 0 allocates the full array; every process also gets a local chunk | No | Each rank gets a different prefix sum; the last rank gets the global total |
+
+Execution times recorded (seconds):
+
+| Program | 2 processes | 4 processes | 8 processes |
+|---|---:|---:|---:|
+| Bcast | 0.0034 | 0.0130 | 0.0067 |
+| Scatter | 0.0034 | 0.0038 | 0.0030 |
+| Gather | 0.0041 | 0.0032 | 0.0018 |
+| Reduce | 0.0035 | 0.0031 | 0.0021 |
+| Allreduce | 0.0034 | 0.0023 | 0.0021 |
+| Scan | 0.0031 | 0.0021 | 0.0018 |
+
+In these runs, Scan was fastest with 2 and 4 processes. With 8 processes, Gather and Scan tied as the fastest at 0.0018 seconds. These times are very small and can vary between runs. Scatter avoids giving every process the full array, while collective operations can handle communication and combining partial results efficiently. The measured fastest method depends on the machine and run.
+
+I would choose MPI_Scan when each process needs a cumulative total through its rank. For example, sum_before_me can give each process a global offset so processes can write their results into separate, consecutive positions in a shared output array.
